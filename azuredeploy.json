@@ -67,10 +67,7 @@
       },
       "properties": {
         "name": "[parameters('siteName')]",
-        "serverFarm": "[parameters('hostingPlanName')]",
-        "javaVersion": "1.8",
-        "javaContainer": "TOMCAT",
-        "javaContainerVersion": "8.5"
+        "serverFarm": "[parameters('hostingPlanName')]"
       },
       "resources": [
         {
@@ -84,7 +81,10 @@
             "appSettings": [
               {
                 "name": "someAppSetting",
-                "value": "[parameters('someAppSetting')]"
+                "value": "[parameters('someAppSetting')]",
+                "javaVersion": "1.8",
+                "javaContainer": "TOMCAT",
+                "javaContainerVersion": "8.5"
               }
             ]
           }
