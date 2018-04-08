@@ -70,25 +70,20 @@
         "serverFarm": "[parameters('hostingPlanName')]"
       },
       "resources": [
-        {
-          "apiVersion": "2014-04-01",
-          "type": "config",
-          "name": "web",
-          "dependsOn": [
-            "[concat('Microsoft.Web/Sites/', parameters('siteName'))]"
-          ],
-          "properties": {
-            "javaVersion": "1.8",
-            "javaContainer": "TOMCAT",
-            "javaContainerVersion": "8.5",
-            "appSettings": [
-              {
-                "name": "someAppSetting",
-                "value": "[parameters('someAppSetting')]"
-              }
-            ]
-          }
-        },
+                {
+                    "apiVersion": "2015-08-01",
+                    "name": "web",
+                    "type": "config",
+                    "dependsOn": [
+                        "[concat('Microsoft.Web/sites/', parameters('webSiteName'))]"
+                    ],
+                    "properties": {
+                        "javaVersion": "1.8",
+                        "javaContainer": "TOMCAT",
+                        "javaContainerVersion": "8.0"
+                    }
+                }
+            ],
         {
           "apiVersion": "2014-04-01",
           "name": "web",
