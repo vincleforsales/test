@@ -78,13 +78,13 @@
             "[concat('Microsoft.Web/Sites/', parameters('siteName'))]"
           ],
           "properties": {
+            "javaVersion": "1.8",
+            "javaContainer": "TOMCAT",
+            "javaContainerVersion": "8.5",
             "appSettings": [
               {
                 "name": "someAppSetting",
-                "value": "[parameters('someAppSetting')]",
-                "javaVersion": "1.8",
-                "javaContainer": "TOMCAT",
-                "javaContainerVersion": "8.5"
+                "value": "[parameters('someAppSetting')]"
               }
             ]
           }
