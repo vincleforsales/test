@@ -67,7 +67,7 @@
       },
       "properties": {
         "name": "[parameters('siteName')]",
-        "serverFarm": "[parameters('hostingPlanName')]"
+        "serverFarm": "[parameters('hostingPlanName')]",
         "javaVersion": "1.8",
         "javaContainer": "TOMCAT",
         "javaContainerVersion": "8.5"
