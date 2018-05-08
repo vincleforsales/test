@@ -77,7 +77,7 @@
             ],
             "properties": {
                 "name": "[parameters('webSiteName')]",
-                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/vsw4')]"
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]"
             },
             "resources": [
                 {
@@ -90,7 +90,7 @@
                     "properties": {
                         "javaVersion": "1.8",
                         "javaContainer": "TOMCAT",
-                        "javaContainerVersion": "8.0"
+                        "javaContainerVersion": "9.0"
                     }
                 }
             ]
