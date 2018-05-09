@@ -61,7 +61,7 @@
                 {
                     "type": "sourcecontrols",
                     "name": "web",
-                    "apiVersion": "2014-04-01",
+                    "apiVersion": "2015-08-01",
                     "properties": {
                         "RepoUrl": "[parameters('repoUrl')]",
                         "branch": "[parameters('branch')]",
