@@ -19,7 +19,13 @@
             "metadata": {
                 "description": "Name of the Azure Web app to create."
             }
-        }
+        },
+        "repoUrl": {
+      "type": "string"
+    },
+    "branch": {
+      "type": "string"
+    }
     },
     "variables": {
         "appHostingPlanIdVar": "[resourceId(resourceGroup().name,'Microsoft.Web/serverfarms',parameters('HostingPlanName'))]"
@@ -50,6 +56,20 @@
                     },
                     "dependsOn": [
                         "[concat('Microsoft.Web/sites/', parameters('webSiteName'))]"
+                    ]
+                },
+                {
+                    "type": "sourcecontrols",
+                    "name": "web",
+                    "apiVersion": "2014-04-01",
+                    "properties": {
+                        "RepoUrl": "[parameters('repoUrl')]",
+                        "branch": "[parameters('branch')]",
+                        "IsManualIntegration": true
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/Sites', parameters('webSiteName'))]",
+                        "[concat('Microsoft.Web/Sites/', parameters('webSiteName'), '/config/web')]"
                     ]
                 }
             ],
