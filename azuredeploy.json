@@ -1,84 +1,89 @@
 {
-    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "hostingPlanName": {
-            "minLength": 1,
-            "type": "String",
-            "metadata": {
-                "description": "Name of the hosting plan to use in Azure."
-            }
-        },
-        "webSiteName": {
-            "minLength": 1,
-            "type": "String",
-            "metadata": {
-                "description": "Name of the Azure Web app to create."
-            }
-        },
-        "skuName": {
-            "defaultValue": "F1",
-            "allowedValues": [
-                "F1",
-                "D1",
-                "B1",
-                "B2",
-                "B3",
-                "S1",
-                "S2",
-                "S3",
-                "P1",
-                "P2",
-                "P3",
-                "P4"
-            ],
-            "type": "String",
-            "metadata": {
-                "description": "Describes plan's pricing tier and instance size. Check details at https://azure.microsoft.com/en-us/pricing/details/app-service/"
-            }
-        },
-        "skuCapacity": {
-            "defaultValue": 1,
-            "minValue": 1,
-            "type": "Int",
-            "metadata": {
-                "description": "Describes plan's instance count"
-            }
-        }
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseResourceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the resource"
+      },
+      "maxLength": 15
     },
-    "variables": {
-        "appHostingPlanIdVar": "[resourceId(resourceGroup().name,'Microsoft.Web/serverfarms',parameters('HostingPlanName'))]"
+    "environments": {
+      "defaultValue": [
+        "Dev",
+        "QA",
+        "UAT",
+        "Preview"
+      ],
+      "type": "array",
+      "metadata": {
+        "description": "Array with the names for the environment slots"
+      },
+      "maxLength": 19
+    }
+  },
+
+  "variables": {
+    "standardPlanMaxAdditionalSlots": 4,
+    "webAppPortalName": "[concat(parameters('baseResourceName'), 'Portal')]",
+    "appServicePlanName": "[concat('AppServicePlan-', parameters('baseResourceName'))]"
+  },
+
+  "resources": [
+    {
+      "apiVersion": "2017-08-01",
+      "type": "Microsoft.Web/serverfarms",
+      "kind": "app",
+      "name": "[variables('appServicePlanName')]",
+      "location": "[resourceGroup().location]",
+      "comments": "This app service plan is used for the web app and slots.",
+      "tags": {
+        "displayName": "AppServicePlan"
+      },
+      "properties": {},
+      "dependsOn": [],
+      "sku": {
+        "name": "[if(lessOrEquals(length(parameters('environments')), variables('standardPlanMaxAdditionalSlots')), 'S1', 'P1')]"
+      }
     },
-    "resources": [
-        {
-            "type": "Microsoft.Web/sites",
-            "name": "[parameters('webSiteName')]",
-            "apiVersion": "2015-08-01",
-            "location": "[resourceGroup().location]",
-            "tags": {
-                "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]": "Resource",
-                "displayName": "Website"
-            },
-            "properties": {
-                "name": "[parameters('webSiteName')]",
-                "serverFarmId": "[variables('appHostingPlanIdVar')]"
-            },
-            "resources": [
-                {
-                    "type": "config",
-                    "name": "web",
-                    "apiVersion": "2015-08-01",
-                    "properties": {
-                        "javaVersion": "1.8",
-                        "javaContainer": "TOMCAT",
-                        "javaContainerVersion": "9.0"
-                    },
-                    "dependsOn": [
-                        "[concat('Microsoft.Web/sites/', parameters('webSiteName'))]"
-                    ]
-                }
-            ],
-            "dependsOn": []
-        }
-    ]
+    {
+      "apiVersion": "2016-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "app",
+      "name": "[variables('webAppPortalName')]",
+      "location": "[resourceGroup().location]",
+      "comments": "This is the web app, also the default 'nameless' slot.",
+      "tags": {
+        "displayName": "WebApp"
+      },
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+      ]
+    },
+    {
+      "apiVersion": "2016-08-01",
+      "type": "Microsoft.Web/sites/slots",
+      "name": "[concat(variables('webAppPortalName'), '/', parameters('environments')[copyIndex()])]",
+      "kind": "app",
+      "location": "[resourceGroup().location]",
+      "comments": "This specifies the web app slots.",
+      "tags": {
+        "displayName": "WebAppSlots"
+      },
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/Sites', variables('webAppPortalName'))]"
+      ],
+      "copy": {
+        "name": "webPortalSlot",
+        "count": "[length(parameters('environments'))]"
+      }
+    }
+  ]
 }
