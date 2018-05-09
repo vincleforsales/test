@@ -3,21 +3,20 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "hostingPlanName": {
-            "type": "string",
             "minLength": 1,
+            "type": "String",
             "metadata": {
                 "description": "Name of the hosting plan to use in Azure."
             }
         },
         "webSiteName": {
-            "type": "string",
             "minLength": 1,
+            "type": "String",
             "metadata": {
                 "description": "Name of the Azure Web app to create."
             }
         },
         "skuName": {
-            "type": "string",
             "defaultValue": "F1",
             "allowedValues": [
                 "F1",
@@ -33,67 +32,53 @@
                 "P3",
                 "P4"
             ],
+            "type": "String",
             "metadata": {
                 "description": "Describes plan's pricing tier and instance size. Check details at https://azure.microsoft.com/en-us/pricing/details/app-service/"
             }
         },
         "skuCapacity": {
-            "type": "int",
             "defaultValue": 1,
             "minValue": 1,
+            "type": "Int",
             "metadata": {
                 "description": "Describes plan's instance count"
             }
         }
     },
+    "variables": {
+        "appHostingPlanIdVar": "[resourceId(resourceGroup().name,'Microsoft.Web/serverfarms',parameters('HostingPlanName'))]"
+    },
     "resources": [
         {
-            "apiVersion": "2015-08-01",
-            "name": "[parameters('hostingPlanName')]",
-            "type": "Microsoft.Web/serverfarms",
-            "location": "[resourceGroup().location]",
-            "tags": {
-                "displayName": "HostingPlan"
-            },
-            "sku": {
-                "name": "[parameters('skuName')]",
-                "capacity": "[parameters('skuCapacity')]"
-            },
-            "properties": {
-                "name": "[parameters('hostingPlanName')]"
-            }
-        },
-        {
-            "apiVersion": "2015-08-01",
-            "name": "[parameters('webSiteName')]",
             "type": "Microsoft.Web/sites",
+            "name": "[parameters('webSiteName')]",
+            "apiVersion": "2015-08-01",
             "location": "[resourceGroup().location]",
             "tags": {
                 "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]": "Resource",
                 "displayName": "Website"
             },
-            "dependsOn": [
-                "[concat('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]"
-            ],
             "properties": {
                 "name": "[parameters('webSiteName')]",
-                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]"
+                "serverFarmId": "[variables('appHostingPlanIdVar')]"
             },
             "resources": [
                 {
-                    "apiVersion": "2015-08-01",
-                    "name": "web",
                     "type": "config",
-                    "dependsOn": [
-                        "[concat('Microsoft.Web/sites/', parameters('webSiteName'))]"
-                    ],
+                    "name": "web",
+                    "apiVersion": "2015-08-01",
                     "properties": {
                         "javaVersion": "1.8",
                         "javaContainer": "TOMCAT",
                         "javaContainerVersion": "9.0"
-                    }
+                    },
+                    "dependsOn": [
+                        "[concat('Microsoft.Web/sites/', parameters('webSiteName'))]"
+                    ]
                 }
-            ]
+            ],
+            "dependsOn": []
         }
     ]
 }
